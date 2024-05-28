@@ -12,9 +12,9 @@
  * 
  * Verwendungsbeispiel:
  * 
- *   VisualListAnimator vla = new VisualListAnimator();        
  *   List<Integer> list1 = new List<Integer>();
  *   List<Integer> list2 = new List<Integer>();
+ *   VisualListAnimator<Integer> vla = new VisualListAnimator<Integer>();
  *   vla.addList(list1, "list1");
  *   vla.addList(list2, "list2");
  *       
@@ -79,9 +79,13 @@ import javax.swing.JLabel;
 import java.util.ArrayList;
 import java.awt.Toolkit;
 
-public class VisualListAnimator extends JFrame {
+/**
+ * Die Klasse VisualListAnimator ist generisch und erwartet als ContentType denselben Typen 
+ * den die Klasse List verwendet.
+ */
+public class VisualListAnimator<ContentType> extends JFrame {
 
-    private ArrayList<VPanel> panels;
+    private ArrayList<VPanel<ContentType>> panels;
     private JPanel jp;
     private JPanel navigation;
     private JButton play;
@@ -105,7 +109,7 @@ public class VisualListAnimator extends JFrame {
      * animate - Anzeige und grafische Animation einer Aktion
      */
     public VisualListAnimator() {     
-        panels = new ArrayList<VPanel>();
+        panels = new ArrayList<VPanel<ContentType>>();
         setTitle("Visual List");
         setLocation(0, 0);        
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -170,8 +174,8 @@ public class VisualListAnimator extends JFrame {
         slider.setMinorTickSpacing(10);
         slider.setPaintTrack(true);                
         Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
-        labelTable.put(new Integer( 0 ), new JLabel("Langsam") );                
-        labelTable.put(new Integer( 100 ), new JLabel("Schnell") );
+        labelTable.put(Integer.valueOf(0), new JLabel("Langsam") );                
+        labelTable.put(Integer.valueOf(100), new JLabel("Schnell") );
         slider.setLabelTable(labelTable);
         slider.setPaintLabels(true); 
         navigation.add(slider);
@@ -202,7 +206,7 @@ public class VisualListAnimator extends JFrame {
      * @param pList Liste, die der Visualisierung hinzugefügt werden soll
      * @param pReferenceName Referenzname der Liste als String
      */
-    public void addList(List pList, String pReferenceName) {
+    public void addList(List<ContentType> pList, String pReferenceName) {
 
         boolean gefunden = false;
         int count = -1;
@@ -215,7 +219,7 @@ public class VisualListAnimator extends JFrame {
 
         // falls es eine neue Originalliste ist
         if (!gefunden) {
-            VPanel neu = new VPanel();            
+            VPanel<ContentType> neu = new VPanel<ContentType>();
             neu.setzeOriginalList(pList);
             neu.addRefName(pReferenceName);
             panels.add(neu);
@@ -239,7 +243,7 @@ public class VisualListAnimator extends JFrame {
      * 
      * @param pList zu entfernende Liste
      */
-    public void removeList(List pList) {
+    public void removeList(List<ContentType> pList) {
         VPanel tmp = null;        
         for (int i=0; i<panels.size(); i++) {
             if (panels.get(i).gibOriginalList().equals(pList)) {                
@@ -316,7 +320,7 @@ public class VisualListAnimator extends JFrame {
      * @param pCommand einer der möglichen Befehle (als String)
      * @param pExplanationText ein Text mit einer Erläuterung (als String)
      */
-    public void animate(List pList, String pCommand, String pExplanationText) {
+    public void animate(List<ContentType> pList, String pCommand, String pExplanationText) {
         int count = -1;
         for (int i=0; i<panels.size(); i++) {
             if (panels.get(i).gibOriginalList().equals(pList)) {
@@ -406,7 +410,7 @@ public class VisualListAnimator extends JFrame {
         else if (pBefehl.equals("CONCAT")) {
             // neue tiefe Kopie erzeugen
             panels.get(vPNum).setzeAnzElemAlt(panels.get(vPNum).gibAnzElem());
-            panels.get(vPNum).setzeList(new List());
+            panels.get(vPNum).setzeList(new List<ContentType>());
             panels.get(vPNum).gibOriginalList().toFirst();
             panels.get(vPNum).setzeAnzElem(0);            
             while (panels.get(vPNum).gibOriginalList().hasAccess()) {
@@ -420,10 +424,10 @@ public class VisualListAnimator extends JFrame {
 
             // nach einem CONCAT kann eine andere Liste nun leer sein, was überprüft werden muss
             for (int i=0; i<panels.size(); i++) {
-                List orig = panels.get(i).gibOriginalList();
+                List<ContentType> orig = panels.get(i).gibOriginalList();
                 if (orig.isEmpty()) {// && panels.get(i).gibListPosition() != -1 && panels.get(i).gibAnzElem() != 0) {
                     panels.get(i).setzeAnzElem(0);
-                    panels.get(i).setzeList(new List());
+                    panels.get(i).setzeList(new List<ContentType>());
                     panels.get(i).setzeListPosition(-1);
                 }
             }            
@@ -502,10 +506,10 @@ public class VisualListAnimator extends JFrame {
 
     }
 
-    private class VPanel extends JPanel {
+    private class VPanel<ContentType> extends JPanel {
 
-        private List list;
-        private List originalList;
+        private List<ContentType> list;
+        private List<ContentType> originalList;
         private String text;
         private ArrayList<String> refNames;
         private int anzElem;
@@ -516,8 +520,8 @@ public class VisualListAnimator extends JFrame {
 
         public VPanel() {
             this.setLayout(new BorderLayout());
-            list = new List();
-            originalList = new List();
+            list = new List<ContentType>();
+            originalList = new List<ContentType>();
             text = "";
             refNames = new ArrayList<String>();
             anzElem = 0;
@@ -544,21 +548,21 @@ public class VisualListAnimator extends JFrame {
             }
         }
 
-        public List gibList() {
+        public List<ContentType> gibList() {
             return list;
         }
 
-        public void setzeList(List pList) {
+        public void setzeList(List<ContentType> pList) {
             list = pList;
         }
 
-        public List gibOriginalList() {
+        public List<ContentType> gibOriginalList() {
             return originalList;
         }
 
-        public void setzeOriginalList(List pOriginalList) {
+        public void setzeOriginalList(List<ContentType> pOriginalList) {
             originalList = pOriginalList;             
-            list = new List();
+            list = new List<ContentType>();
             originalList.toFirst();
             anzElem = 0;            
             while (originalList.hasAccess()) {
